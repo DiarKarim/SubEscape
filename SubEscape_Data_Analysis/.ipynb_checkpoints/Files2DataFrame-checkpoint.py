@@ -496,13 +496,13 @@ def ComputeMetrics(df_all):
             targetRaw = df_all[mask]['Target'].values
             
             # Check data and clean up i.e. remove NaNs etc. 
-            if not dialReconRaw.tolist(): 
+            if not dial.tolist(): 
                 # print('Warning: --> Empty array')
                 slopes.append(np.nan)
                 intercepts.append(np.nan)
                 MSE.append(np.nan)
             else:
-                dialRecon = dialReconRaw[~numpy.isnan(dialReconRaw)]
+                dialRecon = dial[~numpy.isnan(dial)]
                 target = targetRaw[~numpy.isnan(targetRaw)]
 
                 # Detrend data by subtracting 90 degrees, i.e. the bias in the data? <--- check why exactly this is ???? 
