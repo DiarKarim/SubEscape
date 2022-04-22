@@ -42,10 +42,6 @@ def main3(inputList):
 
 
 
-
-
-
-
 def main4(inputList):
     pool = mp.Pool(mp.cpu_count())
     result = pool.map(LoadFiles2DataFrame, inputList)
@@ -461,6 +457,7 @@ def ComputeMetrics(df_all):
     # fig, axs = plt.subplots(8,7)
 
     from sklearn.metrics import mean_squared_error
+    from sklearn.metrics import mean_absolute_error
 
     showPlot = True
     
@@ -479,6 +476,7 @@ def ComputeMetrics(df_all):
         slopes = []
         intercepts = []
         MSE = []
+        MAE = []
         trialz = []
 
         for tr in trials:
@@ -501,6 +499,7 @@ def ComputeMetrics(df_all):
                 slopes.append(np.nan)
                 intercepts.append(np.nan)
                 MSE.append(np.nan)
+                MAE.append(np.nan)
             else:
                 dialRecon = dial[~numpy.isnan(dial)]
                 target = targetRaw[~numpy.isnan(targetRaw)]
@@ -512,6 +511,10 @@ def ComputeMetrics(df_all):
                 # MSE computation 
                 mze = mean_squared_error(target, dialRecon)
                 MSE.append(mze)
+                
+                # MAE computation
+                mae = mean_absolute_error(target, dialRecon)
+                MAE.append(mae)
 
                 plt.subplot(8, 7,tr+1)
                 # Plot regression line through data 
@@ -520,7 +523,7 @@ def ComputeMetrics(df_all):
                 intercepts.append(intercept)
 
                 if showPlot:
-                    txt = plt.text(-60, 60, 'MSE:        '  + str(np.round(mze,1)) + '\nSlope:      ' + str(np.round(slope,2)) + '\nIntercept: ' + str(np.round(intercept,1)), fontsize=3, color="Blue")
+                    txt = plt.text(-60, 60, 'MAE:        '  + str(np.round(mae,1)) + '\nSlope:      ' + str(np.round(slope,2)) + '\nIntercept: ' + str(np.round(intercept,1)), fontsize=3, color="Blue")
                     txt.set_bbox(dict(facecolor='white', alpha=0.5, edgecolor='red'))
                     plt.xticks(fontsize = 3)
                     plt.yticks(fontsize = 3)
@@ -539,7 +542,8 @@ def ComputeMetrics(df_all):
         dat_metrics = {'Trial' : trialz,
                        'Slope' : slopes,
                        'Intercept' : intercepts,
-                       'MeanSqErr' : MSE,}
+                       'MeanSqErr' : MSE,
+                       'MeanAbsErr' : MAE,}
 
         tmpDf = pd.DataFrame(dat_metrics)
         tmpDf.insert(0, 'PtxID', pt)
