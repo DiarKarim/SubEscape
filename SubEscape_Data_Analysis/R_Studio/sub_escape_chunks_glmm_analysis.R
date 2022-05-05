@@ -1,12 +1,12 @@
 # Load data
-data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks224.csv')
-View(data)
+# data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks224.csv')
+data = read.csv('H:/Project/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks536.csv')
+# View(data)
 
 # Convert to nominal factor 
 data$PtxID = factor(data$PtxID)
-data$TrialNum = factor(data$Phase)
-data$tempos = factor(data$Group)
-data$height = factor(data$Trial)
+data$Group = factor(data$Group)
+data$Chunk = factor(data$Chunk)
 
 summary(data)
 
@@ -14,17 +14,17 @@ summary(data)
 library(plyr)
 
 # Explore data in light of EndError metric 
-ddply(data, ~ Phase * Group, function(data) summary(data$MeanAbsErr))
-ddply(data, ~ Phase * Group, summarise, MeanAbsErr.mean = mean(MeanAbsErr), sd = sd(MeanAbsErr))
+ddply(data, ~ Chunk * Group, function(data) summary(data$MAE_Chunk))
+ddply(data, ~ Chunk * Group, summarise, MAE_Chunk.mean = mean(MAE_Chunk), sd = sd(MAE_Chunk))
 
 # Histograms of data
-hist(data[data$Phase == "Baseline" & data$Group == "NoReward",]$MeanAbsErr)
-hist(data[data$Phase == "Adaptation" & data$Group == "NoReward",]$MeanAbsErr)
-hist(data[data$Phase == "Washout" & data$Group == "NoReward",]$MeanAbsErr)
+hist(data[data$Chunk == 14 & data$Group == "NoReward",]$MAE_Chunk)
+hist(data[data$Chunk == 26 & data$Group == "NoReward",]$MAE_Chunk)
+hist(data[data$Chunk == 38 & data$Group == "NoReward",]$MAE_Chunk)
 
-hist(data[data$Phase == "Baseline" & data$Group == "Reward",]$MeanAbsErr)
-hist(data[data$Phase == "Adaptation" & data$Group == "Reward",]$MeanAbsErr)
-hist(data[data$Phase == "Washout" & data$Group == "Reward",]$MeanAbsErr)
+hist(data[data$Chunk == "14" & data$Group == "Reward",]$MAE_Chunk)
+hist(data[data$Chunk == "26" & data$Group == "Reward",]$MAE_Chunk)
+hist(data[data$Chunk == "38" & data$Group == "Reward",]$MAE_Chunk)
 
 #height_reorder <- with(data, reorder(data$height=="low", data$height=="mid", data$height=="high", FUN=mean))
 
@@ -35,9 +35,8 @@ hist(data[data$Phase == "Washout" & data$Group == "Reward",]$MeanAbsErr)
 #                                                    "row_B1", "row_B2", "row_B3","row_B4", "row_B5", "row_B6",
 #                                                    "row_C1", "row_C2", "row_C3","row_C4", "row_C5", "row_C6"))
 
-boxplot(data$MeanAbsErr ~ data$Phase)
-boxplot(data$MeanAbsErr ~ data$Group)
-with(data, interaction.plot(Phase, Group, MeanAbsErr))
+boxplot(data$MAE_Chunk ~ data$Chunk)
+boxplot(data$MAE_Chunk ~ data$Group)
 
 # install.packages("statmod")
 # install.packages("lme4")
@@ -75,24 +74,16 @@ df <- df[!is.infinite(rowSums(df)),]
 
 # see if new Errors data seems Gamma-distributed
 # install.packages("fitdistrplus")
-library(fitdistrplus)
-fit = fitdist(df[df$Phase == "Baseline" & df$Group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
-gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Adaptation" & df$Group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
-gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Washout" & df$Group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
-gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Baseline" & df$Group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
-gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Adaptation" & df$Group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
-gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Washout" & df$Group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
-gofstat(fit) # goodness-of-fit test
+# library(fitdistrplus)
+# fit = fitdist(df[df$Chunk == "14" & df$Group == "NoReward",]$MAE_Chunk, "gamma", discrete=TRUE)
+# gofstat(fit) # goodness-of-fit test
 
 
 # m = glmer(MeanAbsErr ~ (Phase + Group) + (1|PtxID), data=data)
-m = glmer(MeanAbsErr ~ (Phase + Group) + (1|Phase:Group:Trial) + (1|PtxID), data=df, family = gaussian)
+m = glmer(MAE_Chunk ~ (Chunk + Group) + (Chunk*Group) + (1|PtxID), data=df, family = gaussian)
 Anova(m, type=2, test.statistic = "F")
+
+with(df, interaction.plot(Chunk, Group, MAE_Chunk))
 
 # not in Coursera video; treat "Trial" as a nested random effect.
 # m = glmer(Errors ~ (Keyboard * Posture) + (1|Keyboard:Posture:Trial) + (1|Subject), data=mbltxttrials, family=poisson, nAGQ=0) # new, correct syntax
