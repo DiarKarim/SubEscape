@@ -1,12 +1,11 @@
 # Load data
-# data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks224.csv')
-data = read.csv('H:/Project/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks536.csv')
-# View(data)
+data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks949.csv')
+View(data)
 
 # Convert to nominal factor 
 data$PtxID = factor(data$PtxID)
-data$Group = factor(data$Group)
-data$Chunk = factor(data$Chunk)
+data$TrialNum = factor(data$Chunk)
+data$tempos = factor(data$Group)
 
 summary(data)
 
@@ -15,16 +14,16 @@ library(plyr)
 
 # Explore data in light of EndError metric 
 ddply(data, ~ Chunk * Group, function(data) summary(data$MAE_Chunk))
-ddply(data, ~ Chunk * Group, summarise, MAE_Chunk.mean = mean(MAE_Chunk), sd = sd(MAE_Chunk))
+ddply(data, ~ Chunk * Group, summarise, MAE_Chunk = mean(MAE_Chunk), sd = sd(MAE_Chunk))
 
 # Histograms of data
-hist(data[data$Chunk == 14 & data$Group == "NoReward",]$MAE_Chunk)
-hist(data[data$Chunk == 26 & data$Group == "NoReward",]$MAE_Chunk)
-hist(data[data$Chunk == 38 & data$Group == "NoReward",]$MAE_Chunk)
+hist(data[data$Chunk == "14" & data$Group == "NoReward",]$MAE_Chunk)
+hist(data[data$Chunk == "24" & data$Group == "NoReward",]$MAE_Chunk)
+# hist(data[data$Phase == "Washout" & data$Group == "NoReward",]$MAE_Chunk)
 
 hist(data[data$Chunk == "14" & data$Group == "Reward",]$MAE_Chunk)
-hist(data[data$Chunk == "26" & data$Group == "Reward",]$MAE_Chunk)
-hist(data[data$Chunk == "38" & data$Group == "Reward",]$MAE_Chunk)
+hist(data[data$Chunk == "24" & data$Group == "Reward",]$MAE_Chunk)
+# hist(data[data$Phase == "Washout" & data$Group == "Reward",]$MAE_Chunk)
 
 #height_reorder <- with(data, reorder(data$height=="low", data$height=="mid", data$height=="high", FUN=mean))
 
@@ -37,6 +36,7 @@ hist(data[data$Chunk == "38" & data$Group == "Reward",]$MAE_Chunk)
 
 boxplot(data$MAE_Chunk ~ data$Chunk)
 boxplot(data$MAE_Chunk ~ data$Group)
+with(data, interaction.plot(Chunk, Group, MAE_Chunk))
 
 # install.packages("statmod")
 # install.packages("lme4")
@@ -74,16 +74,24 @@ df <- df[!is.infinite(rowSums(df)),]
 
 # see if new Errors data seems Gamma-distributed
 # install.packages("fitdistrplus")
-# library(fitdistrplus)
-# fit = fitdist(df[df$Chunk == "14" & df$Group == "NoReward",]$MAE_Chunk, "gamma", discrete=TRUE)
-# gofstat(fit) # goodness-of-fit test
+library(fitdistrplus)
+fit = fitdist(df[df$Chunk == "Baseline" & df$Group == "NoReward",]$MAE_Chunk, "gamma", discrete=TRUE)
+gofstat(fit) # goodness-of-fit test
+fit = fitdist(df[df$Chunk == "Adaptation" & df$Group == "NoReward",]$MAE_Chunk, "gamma", discrete=TRUE)
+gofstat(fit) # goodness-of-fit test
+fit = fitdist(df[df$Chunk == "Washout" & df$Group == "NoReward",]$MAE_Chunk, "gamma", discrete=TRUE)
+gofstat(fit) # goodness-of-fit test
+fit = fitdist(df[df$Chunk == "Baseline" & df$Group == "Reward",]$MAE_Chunk, "gamma", discrete=TRUE)
+gofstat(fit) # goodness-of-fit test
+fit = fitdist(df[df$Chunk == "Adaptation" & df$Group == "Reward",]$MAE_Chunk, "gamma", discrete=TRUE)
+gofstat(fit) # goodness-of-fit test
+fit = fitdist(df[df$Chunk == "Washout" & df$Group == "Reward",]$MAE_Chunk, "gamma", discrete=TRUE)
+gofstat(fit) # goodness-of-fit test
 
 
 # m = glmer(MeanAbsErr ~ (Phase + Group) + (1|PtxID), data=data)
-m = glmer(MAE_Chunk ~ (Chunk + Group) + (Chunk*Group) + (1|PtxID), data=df, family = gaussian)
-Anova(m, type=2, test.statistic = "F")
-
-with(df, interaction.plot(Chunk, Group, MAE_Chunk))
+m = lmer(MAE_Chunk ~ Group, data=df, family = gaussian)
+Anova(m, type=3, test.statistic = "F")
 
 # not in Coursera video; treat "Trial" as a nested random effect.
 # m = glmer(Errors ~ (Keyboard * Posture) + (1|Keyboard:Posture:Trial) + (1|Subject), data=mbltxttrials, family=poisson, nAGQ=0) # new, correct syntax
