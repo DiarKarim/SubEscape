@@ -1,0 +1,7 @@
+	0	1	2	3
+0	Model:	MixedLM	Dependent Variable:	MeanAbsErr
+1	No. Observations:	1042750	Method:	REML
+2	No. Groups:	14	Scale:	0.0000
+3	Min. group size:	50095	Log-Likelihood:	22626364.2037
+4	Max. group size:	77959	Converged:	No
+5	Mean group size:	74482.1		

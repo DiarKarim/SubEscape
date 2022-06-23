@@ -4,9 +4,9 @@ View(data)
 
 # Convert to nominal factor 
 data$PtxID = factor(data$PtxID)
-data$TrialNum = factor(data$Phase)
-data$tempos = factor(data$Group)
-data$height = factor(data$Trial)
+data$Phase = factor(data$Phase)
+data$Group = factor(data$Group)
+data$Trial = factor(data$Trial)
 
 summary(data)
 
@@ -89,9 +89,13 @@ gofstat(fit) # goodness-of-fit test
 fit = fitdist(df[df$Phase == "Washout" & df$Group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
 gofstat(fit) # goodness-of-fit test
 
+library(multcomp) # for glht
+library(emmeans) # for emm
 
+# MeanSqErr
 # m = glmer(MeanAbsErr ~ (Phase + Group) + (1|PtxID), data=data)
-m = glmer(MeanAbsErr ~ (Phase + Group) + (1|Phase:Group:Trial) + (1|PtxID), data=df, family = gaussian)
+#m = glmer(Intercept ~ (Phase + Group) + (1|Phase:Group:Trial) + (1|PtxID), data=df, family = gaussian)
+m = glmer(MeanAbsErr ~ (Phase * Group) + (1|PtxID), data=df, family = gaussian)
 Anova(m, type=2, test.statistic = "F")
 
 # not in Coursera video; treat "Trial" as a nested random effect.
@@ -108,12 +112,9 @@ Anova(m, type=2, test.statistic = "F")
 
 # Post Hoc Analysis part 
 # Positional Error post hoc analysis
-summary(glht(m, lsm(pairwise ~ TargetID * height)), test=adjusted(type="holm"))
-with(df, interaction.plot(TargetID, height, EndError_cleaned))
+#summary(glht(m, lsm(pairwise ~ TargetID * height)), test=adjusted(type="holm"))
+#with(df, interaction.plot(TargetID, height, EndError_cleaned))
 
-
-library(multcomp) # for glht
-library(emmeans) # for emm
 
 # perform post hoc pairwise comparisons
 with(df, interaction.plot(Phase, Group, MeanAbsErr, ylim=c(0, max(df$MeanAbsErr)))) # for convenience

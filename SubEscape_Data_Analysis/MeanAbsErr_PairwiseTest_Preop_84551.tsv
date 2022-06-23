@@ -1,0 +1,2 @@
+	T	dof	alternative	p-val	CI95%	cohen-d	BF10	power
+T-test	-3.589	133.978	two-sided	0.0	[-7.49 -2.17]	0.437	55.817	0.906

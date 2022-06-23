@@ -1,0 +1,8 @@
+	Contrast	Phase	A	B	Paired	Parametric	U-val	W-val	alternative	p-unc	p-corr	p-adjust	hedges
+0	Phase	-	Adaptation	Baseline	True	False		0.0	two-sided	0.0	0.0	bonf	1.095
+1	Phase	-	Adaptation	Washout	True	False		21.0	two-sided	0.0	0.001	bonf	0.809
+2	Phase	-	Baseline	Washout	True	False		26.0	two-sided	0.001	0.002	bonf	0.117
+3	Group	-	NoReward	Reward	False	False	73.0		two-sided	0.41			0.447
+4	Phase * Group	Adaptation	NoReward	Reward	False	False	70.0		two-sided	0.531	1.0	bonf	0.374
+5	Phase * Group	Baseline	NoReward	Reward	False	False	74.0		two-sided	0.373	1.0	bonf	0.429
+6	Phase * Group	Washout	NoReward	Reward	False	False	70.0		two-sided	0.531	1.0	bonf	0.412
