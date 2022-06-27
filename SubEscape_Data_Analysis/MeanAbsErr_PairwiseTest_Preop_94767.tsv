@@ -1,0 +1,5 @@
+	Contrast	trial	A	B	Paired	Parametric	U-val	W-val	alternative	p-unc	p-corr	p-adjust	hedges
+0	trial	-	42	43	True	False		37.0	two-sided	0.358			0.383
+1	group	-	NoReward	Reward	False	False	17.0		two-sided	0.414			-0.495
+2	trial * group	42	NoReward	Reward	False	False	14.0		two-sided	0.228	0.457	holm	-0.758
+3	trial * group	43	NoReward	Reward	False	False	25.0		two-sided	0.95	0.95	holm	0.049
