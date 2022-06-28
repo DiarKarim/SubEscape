@@ -1,12 +1,12 @@
 # Load data
-data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_metrics_102_.csv')
+data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/MeanAbsErrDF.csv')
 View(data)
 
 # Convert to nominal factor 
 data$PtxID = factor(data$PtxID)
 data$Phase = factor(data$Phase)
-data$Group = factor(data$Group)
-data$Trial = factor(data$Trial)
+data$group = factor(data$group)
+data$trial = factor(data$trial)
 
 summary(data)
 
@@ -14,17 +14,17 @@ summary(data)
 library(plyr)
 
 # Explore data in light of EndError metric 
-ddply(data, ~ Phase * Group, function(data) summary(data$MeanAbsErr))
-ddply(data, ~ Phase * Group, summarise, MeanAbsErr.mean = mean(MeanAbsErr), sd = sd(MeanAbsErr))
+ddply(data, ~ Phase * group, function(data) summary(data$MeanAbsErr))
+ddply(data, ~ Phase * group, summarise, MeanAbsErr.mean = mean(MeanAbsErr), sd = sd(MeanAbsErr))
 
 # Histograms of data
-hist(data[data$Phase == "Baseline" & data$Group == "NoReward",]$MeanAbsErr)
-hist(data[data$Phase == "Adaptation" & data$Group == "NoReward",]$MeanAbsErr)
-hist(data[data$Phase == "Washout" & data$Group == "NoReward",]$MeanAbsErr)
+hist(data[data$Phase == "Baseline" & data$group == "NoReward",]$MeanAbsErr)
+hist(data[data$Phase == "Adaptation" & data$group == "NoReward",]$MeanAbsErr)
+hist(data[data$Phase == "Washout" & data$group == "NoReward",]$MeanAbsErr)
 
-hist(data[data$Phase == "Baseline" & data$Group == "Reward",]$MeanAbsErr)
-hist(data[data$Phase == "Adaptation" & data$Group == "Reward",]$MeanAbsErr)
-hist(data[data$Phase == "Washout" & data$Group == "Reward",]$MeanAbsErr)
+hist(data[data$Phase == "Baseline" & data$group == "Reward",]$MeanAbsErr)
+hist(data[data$Phase == "Adaptation" & data$group == "Reward",]$MeanAbsErr)
+hist(data[data$Phase == "Washout" & data$group == "Reward",]$MeanAbsErr)
 
 #height_reorder <- with(data, reorder(data$height=="low", data$height=="mid", data$height=="high", FUN=mean))
 
@@ -36,8 +36,8 @@ hist(data[data$Phase == "Washout" & data$Group == "Reward",]$MeanAbsErr)
 #                                                    "row_C1", "row_C2", "row_C3","row_C4", "row_C5", "row_C6"))
 
 boxplot(data$MeanAbsErr ~ data$Phase)
-boxplot(data$MeanAbsErr ~ data$Group)
-with(data, interaction.plot(Phase, Group, MeanAbsErr))
+boxplot(data$MeanAbsErr ~ data$group)
+with(data, interaction.plot(Phase, group, MeanAbsErr))
 
 # install.packages("statmod")
 # install.packages("lme4")
@@ -50,8 +50,9 @@ library(car)
 # Post hoc pairwise comparisons packages 
 # install.packages("multcomp")
 # install.packages("lsmeans")
-library(multcomp)
+library(multcomp)# for glht
 library(lsmeans)
+library(emmeans) # for emm
 
 # Set sum-to-zero contrasts for the Anova cells 
 # contrasts(data$Phase) <- "contr.sum"
@@ -76,26 +77,25 @@ df <- df[!is.infinite(rowSums(df)),]
 # see if new Errors data seems Gamma-distributed
 # install.packages("fitdistrplus")
 library(fitdistrplus)
-fit = fitdist(df[df$Phase == "Baseline" & df$Group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
+fit = fitdist(df[df$Phase == "Baseline" & df$group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
 gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Adaptation" & df$Group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
+fit = fitdist(df[df$Phase == "Adaptation" & df$group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
 gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Washout" & df$Group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
+fit = fitdist(df[df$Phase == "Washout" & df$group == "NoReward",]$MeanAbsErr, "gamma", discrete=TRUE)
 gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Baseline" & df$Group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
+fit = fitdist(df[df$Phase == "Baseline" & df$group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
 gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Adaptation" & df$Group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
+fit = fitdist(df[df$Phase == "Adaptation" & df$group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
 gofstat(fit) # goodness-of-fit test
-fit = fitdist(df[df$Phase == "Washout" & df$Group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
+fit = fitdist(df[df$Phase == "Washout" & df$group == "Reward",]$MeanAbsErr, "gamma", discrete=TRUE)
 gofstat(fit) # goodness-of-fit test
 
-library(multcomp) # for glht
-library(emmeans) # for emm
+
 
 # MeanSqErr
 # m = glmer(MeanAbsErr ~ (Phase + Group) + (1|PtxID), data=data)
 #m = glmer(Intercept ~ (Phase + Group) + (1|Phase:Group:Trial) + (1|PtxID), data=df, family = gaussian)
-m = glmer(MeanAbsErr ~ (Phase * Group) + (1|PtxID), data=df, family = gaussian)
+m = glmer(MeanAbsErr ~ (Phase * group) + (1|PtxID), data=df, family = gaussian)
 Anova(m, type=2, test.statistic = "F")
 
 # not in Coursera video; treat "Trial" as a nested random effect.
@@ -117,8 +117,8 @@ Anova(m, type=2, test.statistic = "F")
 
 
 # perform post hoc pairwise comparisons
-with(df, interaction.plot(Phase, Group, MeanAbsErr, ylim=c(0, max(df$MeanAbsErr)))) # for convenience
-summary(glht(m, emm(pairwise ~ Phase * Group)), test=adjusted(type="holm"))
+with(df, interaction.plot(Phase, group, MeanAbsErr, ylim=c(0, max(df$MeanAbsErr)))) # for convenience
+summary(glht(m, emm(pairwise ~ Phase * group)), test=adjusted(type="holm"))
 
 
 
