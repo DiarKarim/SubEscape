@@ -1,11 +1,12 @@
 # Load data
-data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks949.csv')
+#data = read.csv('C:/Users/PC/Documents/Projects/Github/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/df_chunks949.csv')
+data = read.csv('H:/Project/SubEscape/SubEscape_Data_Analysis/Pickel_n_CSV_files/ChunkedData.csv')
 View(data)
 
 # Convert to nominal factor 
 data$PtxID = factor(data$PtxID)
-data$TrialNum = factor(data$Chunk)
-data$tempos = factor(data$Group)
+data$Chunk = factor(data$Chunk)
+data$Group = factor(data$Group)
 
 summary(data)
 
@@ -90,7 +91,7 @@ gofstat(fit) # goodness-of-fit test
 
 
 # m = glmer(MeanAbsErr ~ (Phase + Group) + (1|PtxID), data=data)
-m = lmer(MAE_Chunk ~ Group, data=df, family = gaussian)
+m = glmer(MAE_Chunk ~ Group, data=data, family = gaussian)
 Anova(m, type=3, test.statistic = "F")
 
 # not in Coursera video; treat "Trial" as a nested random effect.
@@ -107,16 +108,16 @@ Anova(m, type=3, test.statistic = "F")
 
 # Post Hoc Analysis part 
 # Positional Error post hoc analysis
-summary(glht(m, lsm(pairwise ~ Phase * Group)), test=adjusted(type="holm"))
-with(df, interaction.plot(Phase, Group, MeanAbsErr))
+summary(glht(m, lsm(pairwise ~ Chunk * Group)), test=adjusted(type="holm"))
+with(df, interaction.plot(Chunk, Group, MAE_Chunk))
 
 
-library(multcomp) # for glht
-library(emmeans) # for emm
+#library(multcomp) # for glht
+#library(emmeans) # for emm
 
 # perform post hoc pairwise comparisons
-with(df, interaction.plot(Phase, Group, MeanAbsErr, ylim=c(0, max(df$MeanAbsErr)))) # for convenience
-summary(glht(m, emm(pairwise ~ Phase * Group)), test=adjusted(type="holm"))
+#with(df, interaction.plot(Chunk, Group, MAE_Chunk, ylim=c(0, max(df$MAE_Chunk)))) # for convenience
+#summary(glht(m, emm(pairwise ~ Chunk * Group)), test=adjusted(type="holm"))
 
 
 
